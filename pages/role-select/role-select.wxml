@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="title">请选择您的身份</view>
+  <view class="role-list">
+    <view class="role-item" bindtap="selectRole" data-role="driver">
+      <view class="role-icon">
+        <image src="../../images/driver.png" mode="aspectFit"></image>
+      </view>
+      <view class="role-name">司机</view>
+      <view class="role-desc">无需账号密码，授权登录</view>
+    </view>
+    <view class="role-item" bindtap="selectRole" data-role="customer">
+      <view class="role-icon">
+        <image src="../../images/customer.png" mode="aspectFit"></image>
+      </view>
+      <view class="role-name">客户</view>
+      <view class="role-desc">需要输入账号密码登录</view>
+    </view>
+  </view>
+</view>

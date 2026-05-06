@@ -1,0 +1,57 @@
+<view class="container">
+  <view class="header">
+    <text class="title">客户工作台</text>
+    <view class="user-info">
+      <text>欢迎，{{userInfo.account || '客户'}}</text>
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </view>
+  </view>
+  
+  <view class="content">
+    <view class="section">
+      <text class="section-title">功能导航</text>
+      <view class="nav-list">
+        <view class="nav-item" bindtap="navigateTo">
+          <view class="nav-icon">
+            <image src="../../images/order.png" mode="aspectFit"></image>
+          </view>
+          <text class="nav-name">订单管理</text>
+        </view>
+        <view class="nav-item" bindtap="navigateTo">
+          <view class="nav-icon">
+            <image src="../../images/customer.png" mode="aspectFit"></image>
+          </view>
+          <text class="nav-name">客户管理</text>
+        </view>
+        <view class="nav-item" bindtap="navigateTo">
+          <view class="nav-icon">
+            <image src="../../images/queue.png" mode="aspectFit"></image>
+          </view>
+          <text class="nav-name">排队管理</text>
+        </view>
+        <view class="nav-item" bindtap="navigateTo">
+          <view class="nav-icon">
+            <image src="../../images/report.png" mode="aspectFit"></image>
+          </view>
+          <text class="nav-name">报表统计</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="section">
+      <text class="section-title">最近订单</text>
+      <view class="order-list">
+        <view class="order-item" wx:for="{{orderList}}" wx:key="index">
+          <view class="order-info">
+            <text class="order-id">订单号: {{item.id}}</text>
+            <text class="order-time">{{item.time}}</text>
+          </view>
+          <text class="order-status">{{item.status}}</text>
+        </view>
+        <view class="empty" wx:if="{{orderList.length === 0}}">
+          <text>暂无订单</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

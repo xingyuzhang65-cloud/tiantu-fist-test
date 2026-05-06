@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="header">
+    <text class="title">司机工作台</text>
+    <view class="user-info">
+      <text>欢迎，{{userInfo.nickName || '司机'}}</text>
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </view>
+  </view>
+  
+  <view class="content">
+    <view class="section">
+      <text class="section-title">客户排队</text>
+      <view class="queue-list">
+        <view class="queue-item" wx:for="{{queueList}}" wx:key="index">
+          <view class="queue-info">
+            <text class="queue-name">{{item.name}}</text>
+            <text class="queue-number">排队号: {{item.number}}</text>
+          </view>
+          <text class="queue-status">{{item.status}}</text>
+        </view>
+        <view class="empty" wx:if="{{queueList.length === 0}}">
+          <text>暂无排队客户</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
