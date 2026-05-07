@@ -14,6 +14,12 @@
           <el-input v-model="searchForm.boxNo" placeholder="请输入系统箱号" style="width: 180px" />
         </el-form-item>
 
+        <el-form-item label="客户简称">
+          <el-select v-model="searchForm.customerShortName" placeholder="请选择客户简称" clearable style="width: 150px">
+            <el-option v-for="customer in customerOptions" :key="customer.value" :label="customer.label" :value="customer.value" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="目的地">
           <el-input v-model="searchForm.destination" placeholder="请输入目的地" style="width: 150px" />
         </el-form-item>
@@ -56,10 +62,14 @@
         <el-table-column prop="waybillNo" label="追踪编码" width="150" fixed="left" />
         <el-table-column prop="fbaNo" label="FBA号" width="180" />
         <el-table-column prop="boxNo" label="系统箱号" width="220" />
+        <el-table-column prop="customerShortName" label="客户简称" width="130" />
+        <el-table-column prop="recipient" label="收件人" width="130" />
         <el-table-column prop="destination" label="目的地" width="150" />
+        <el-table-column prop="city" label="城市" width="120" />
+        <el-table-column prop="state" label="州" width="100" />
         <el-table-column prop="zipCode" label="邮编" width="100" />
-        <el-table-column prop="quantity" label="件数" width="80" />
-        <el-table-column prop="currency" label="打单币种" width="100" />
+        <el-table-column prop="addressLine1" label="地址一" width="220" />
+        <el-table-column prop="currency" label="币种" width="100" />
         <el-table-column label="承运商" width="150">
           <template #default="{ row }">
             {{ getCarrierLabel(row.carrier) || '-' }}
@@ -104,6 +114,7 @@ const searchForm = ref({
   waybillNo: '',
   fbaNo: '',
   boxNo: '',
+  customerShortName: '',
   destination: '',
   carrier: '',
   status: '',
@@ -116,6 +127,14 @@ const carrierOptions = ref([
   { label: '承运商B', value: 'carrierB' },
   { label: '承运商C', value: 'carrierC' },
   { label: '承运商D', value: 'carrierD' }
+])
+
+const customerOptions = ref([
+  { label: '天途华东', value: '天途华东' },
+  { label: '天途华南', value: '天途华南' },
+  { label: '天途北美', value: '天途北美' },
+  { label: '星宇电商', value: '星宇电商' },
+  { label: '云仓客户', value: '云仓客户' }
 ])
 
 const allShipmentData = ref([])
@@ -136,14 +155,30 @@ const getStatus = (row) => {
 const initMockData = () => {
   const mockData = []
   const carriers = carrierOptions.value.map(carrier => carrier.value)
+  const customerShortNames = customerOptions.value.map(customer => customer.value)
+  const recipients = ['Amazon LAX', 'Amazon JFK', 'Amazon ORD', 'Amazon IAH', 'Amazon PHX']
   const destinations = ['洛杉矶', '纽约', '芝加哥', '休斯顿', '凤凰城']
+  const cities = ['Los Angeles', 'New York', 'Chicago', 'Houston', 'Phoenix']
+  const states = ['CA', 'NY', 'IL', 'TX', 'AZ']
+  const addressLine1List = [
+    '123 Amazon Way',
+    '88 Madison Ave',
+    '3500 S Pulaski Rd',
+    '9100 Bay Area Blvd',
+    '4100 W Van Buren St'
+  ]
   const currencies = ['USD', 'CNY', 'EUR', 'GBP']
   let rowIndex = 1
 
   for (let i = 1; i <= 30; i++) {
     const waybillNo = `YW${2026040000 + i}`
     const fbaNo = `FBA2026${String(i).padStart(6, '0')}`
+    const customerShortName = customerShortNames[i % customerShortNames.length]
+    const recipient = recipients[i % recipients.length]
     const destination = destinations[i % destinations.length]
+    const city = cities[i % cities.length]
+    const state = states[i % states.length]
+    const addressLine1 = addressLine1List[i % addressLine1List.length]
     const zipCode = `${90000 + i * 17}`
     const currency = currencies[i % currencies.length]
     const carrier = carriers[i % carriers.length]
@@ -158,9 +193,13 @@ const initMockData = () => {
         waybillNo,
         fbaNo,
         boxNo: `${waybillNo}U${String(j).padStart(4, '0')}`,
+        customerShortName,
+        recipient,
         destination,
+        city,
+        state,
         zipCode,
-        quantity: 1,
+        addressLine1,
         currency,
         carrier,
         trackingNo,
@@ -182,6 +221,7 @@ const refreshTable = () => {
   if (form.waybillNo) filtered = filtered.filter(item => item.waybillNo.includes(form.waybillNo))
   if (form.fbaNo) filtered = filtered.filter(item => item.fbaNo.includes(form.fbaNo))
   if (form.boxNo) filtered = filtered.filter(item => item.boxNo.includes(form.boxNo))
+  if (form.customerShortName) filtered = filtered.filter(item => item.customerShortName === form.customerShortName)
   if (form.destination) filtered = filtered.filter(item => item.destination.includes(form.destination))
   if (form.carrier) filtered = filtered.filter(item => item.carrier === form.carrier)
   if (form.status) filtered = filtered.filter(item => getStatus(item) === form.status)
@@ -213,6 +253,7 @@ const resetForm = () => {
     waybillNo: '',
     fbaNo: '',
     boxNo: '',
+    customerShortName: '',
     destination: '',
     carrier: '',
     status: '',
@@ -239,10 +280,14 @@ const exportExcel = () => {
     追踪编码: item.waybillNo,
     FBA号: item.fbaNo,
     系统箱号: item.boxNo,
+    客户简称: item.customerShortName,
+    收件人: item.recipient,
     目的地: item.destination,
+    城市: item.city,
+    州: item.state,
     邮编: item.zipCode,
-    件数: item.quantity,
-    打单币种: item.currency,
+    地址一: item.addressLine1,
+    币种: item.currency,
     承运商: getCarrierLabel(item.carrier),
     快递单号: item.trackingNo,
     状态: getStatus(item) === 'normal' ? '正常' : '异常',
