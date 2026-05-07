@@ -8,7 +8,7 @@
         <el-menu :default-active="activeMenu" class="sidebar-menu" router>
           <el-menu-item index="/fba/shipment-list">
             <el-icon><List /></el-icon>
-            <span>尾端派送方式明细</span>
+            <span>快递单号准确率明细</span>
           </el-menu-item>
           <el-menu-item index="/fba/tracking-accuracy">
             <el-icon><TrendCharts /></el-icon>

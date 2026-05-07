@@ -37,7 +37,7 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="运单创建时间">
+        <el-form-item label="出仓时间">
           <el-date-picker v-model="searchForm.createTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="width: 240px" />
         </el-form-item>
 
@@ -86,7 +86,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="运单创建时间" width="180" />
+        <el-table-column prop="createTime" label="出仓时间" width="180" />
         <el-table-column prop="amazonSignTime" label="亚马逊签收时间" width="180" />
       </el-table>
 
@@ -291,7 +291,7 @@ const exportExcel = () => {
     承运商: getCarrierLabel(item.carrier),
     快递单号: item.trackingNo,
     状态: getStatus(item) === 'normal' ? '正常' : '异常',
-    运单创建时间: item.createTime,
+    出仓时间: item.createTime,
     亚马逊签收时间: item.amazonSignTime
   }))
 
