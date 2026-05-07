@@ -21,7 +21,9 @@
         </el-form-item>
 
         <el-form-item label="目的地">
-          <el-input v-model="searchForm.destination" placeholder="请输入目的地" style="width: 150px" />
+          <el-select v-model="searchForm.destination" placeholder="请选择目的地" clearable style="width: 150px">
+            <el-option v-for="country in destinationOptions" :key="country.value" :label="country.label" :value="country.value" />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="承运商">
@@ -137,6 +139,17 @@ const customerOptions = ref([
   { label: '云仓客户', value: '云仓客户' }
 ])
 
+const destinationOptions = ref([
+  { label: '美国', value: '美国' },
+  { label: '加拿大', value: '加拿大' },
+  { label: '英国', value: '英国' },
+  { label: '德国', value: '德国' },
+  { label: '法国', value: '法国' },
+  { label: '意大利', value: '意大利' },
+  { label: '西班牙', value: '西班牙' },
+  { label: '荷兰', value: '荷兰' }
+])
+
 const allShipmentData = ref([])
 const shipmentData = ref([])
 const total = ref(0)
@@ -157,7 +170,7 @@ const initMockData = () => {
   const carriers = carrierOptions.value.map(carrier => carrier.value)
   const customerShortNames = customerOptions.value.map(customer => customer.value)
   const recipients = ['Amazon LAX', 'Amazon JFK', 'Amazon ORD', 'Amazon IAH', 'Amazon PHX']
-  const destinations = ['洛杉矶', '纽约', '芝加哥', '休斯顿', '凤凰城']
+  const destinations = destinationOptions.value.map(country => country.value)
   const cities = ['Los Angeles', 'New York', 'Chicago', 'Houston', 'Phoenix']
   const states = ['CA', 'NY', 'IL', 'TX', 'AZ']
   const addressLine1List = [
@@ -222,7 +235,7 @@ const refreshTable = () => {
   if (form.fbaNo) filtered = filtered.filter(item => item.fbaNo.includes(form.fbaNo))
   if (form.boxNo) filtered = filtered.filter(item => item.boxNo.includes(form.boxNo))
   if (form.customerShortName) filtered = filtered.filter(item => item.customerShortName === form.customerShortName)
-  if (form.destination) filtered = filtered.filter(item => item.destination.includes(form.destination))
+  if (form.destination) filtered = filtered.filter(item => item.destination === form.destination)
   if (form.carrier) filtered = filtered.filter(item => item.carrier === form.carrier)
   if (form.status) filtered = filtered.filter(item => getStatus(item) === form.status)
   if (form.createTime?.length === 2) filtered = filterByDateRange(filtered, 'createTime', form.createTime)
