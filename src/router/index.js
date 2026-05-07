@@ -14,6 +14,11 @@ const routes = [
     name: 'FbaShipmentList',
     component: () => import('../views/FbaShipmentList.vue')
   },
+  {
+    path: '/fba/tracking-accuracy',
+    name: 'TrackingAccuracyDashboard',
+    component: () => import('../views/TrackingAccuracyDashboard.vue')
+  },
 ]
 
 const router = createRouter({

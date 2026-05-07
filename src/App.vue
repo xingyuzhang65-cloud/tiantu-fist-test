@@ -10,6 +10,10 @@
             <el-icon><List /></el-icon>
             <span>尾端派送方式明细</span>
           </el-menu-item>
+          <el-menu-item index="/fba/tracking-accuracy">
+            <el-icon><TrendCharts /></el-icon>
+            <span>快递单号准确率看板</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main>
@@ -22,7 +26,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { List } from '@element-plus/icons-vue'
+import { List, TrendCharts } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const activeMenu = computed(() => route.path)
