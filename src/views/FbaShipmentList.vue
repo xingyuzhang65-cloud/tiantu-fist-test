@@ -71,7 +71,7 @@
         <el-table-column prop="state" label="州" width="100" />
         <el-table-column prop="zipCode" label="邮编" width="100" />
         <el-table-column prop="addressLine1" label="地址一" width="220" />
-        <el-table-column prop="currency" label="币种" width="100" />
+
         <el-table-column label="承运商" width="150">
           <template #default="{ row }">
             {{ getCarrierLabel(row.carrier) || '-' }}
@@ -180,7 +180,6 @@ const initMockData = () => {
     '9100 Bay Area Blvd',
     '4100 W Van Buren St'
   ]
-  const currencies = ['USD', 'CNY', 'EUR', 'GBP']
   let rowIndex = 1
 
   for (let i = 1; i <= 30; i++) {
@@ -193,7 +192,6 @@ const initMockData = () => {
     const state = states[i % states.length]
     const addressLine1 = addressLine1List[i % addressLine1List.length]
     const zipCode = `${90000 + i * 17}`
-    const currency = currencies[i % currencies.length]
     const carrier = carriers[i % carriers.length]
     const trackingNo = i % 5 !== 0 ? `TRK${2026000000 + i}` : ''
     const createTime = new Date(2026, 3, 1 + (i % 20), 9, 30).toLocaleString('zh-CN')
@@ -213,7 +211,6 @@ const initMockData = () => {
         state,
         zipCode,
         addressLine1,
-        currency,
         carrier,
         trackingNo,
         createTime,
@@ -300,7 +297,6 @@ const exportExcel = () => {
     州: item.state,
     邮编: item.zipCode,
     地址一: item.addressLine1,
-    币种: item.currency,
     承运商: getCarrierLabel(item.carrier),
     快递单号: item.trackingNo,
     状态: getStatus(item) === 'normal' ? '正常' : '异常',
