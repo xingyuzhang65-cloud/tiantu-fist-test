@@ -38,11 +38,11 @@
         <strong>{{ summary.total }}</strong>
       </div>
       <div class="summary-item">
-        <span class="summary-label">正常填写快递单号</span>
+        <span class="summary-label">正常</span>
         <strong>{{ summary.normal }}</strong>
       </div>
       <div class="summary-item warning">
-        <span class="summary-label">异常填写货箱</span>
+        <span class="summary-label">异常</span>
         <strong>{{ summary.abnormal }}</strong>
       </div>
     </div>
