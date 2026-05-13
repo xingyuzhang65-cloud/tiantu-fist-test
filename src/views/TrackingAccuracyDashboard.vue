@@ -210,12 +210,11 @@ const renderChart = () => {
         const point = params[0]
         const row = point.data.raw
         return [
-          `节点名称：快递单号准确率`,
-          `入仓时间：${row.date}`,
-          `准确率：${row.accuracy}%`,
-          `总量：${row.total}`,
-          `正常填写快递单号数量：${row.normal}`,
-          `异常填写货箱数量：${row.abnormal}`
+          `<span style="color:#86909c;font-size:12px">${row.date.slice(5)}</span>`,
+          `<span style="color:#165dff;font-weight:600">准确率：${row.accuracy}%</span>`,
+          `<span style="color:#1d2129">总量：${row.total}</span>`,
+          `<span style="color:#13c7a2">正常：${row.normal}</span>`,
+          `<span style="color:#f56c6c">异常：${row.abnormal}</span>`
         ].join('<br/>')
       }
     },
