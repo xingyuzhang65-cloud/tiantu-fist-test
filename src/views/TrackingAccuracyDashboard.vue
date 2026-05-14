@@ -190,79 +190,106 @@ const renderChart = () => {
   const rows = dashboardRows.value
 
   chartInstance.setOption({
-    color: ['#165dff'],
+    color: ['#165dff', '#13c7a2', '#f56c6c', '#ff7d00'],
     grid: {
       top: 42,
       left: 48,
-      right: 28,
+      right: 68,
       bottom: 42
+    },
+    legend: {
+      data: ['总量', '正常', '异常', '准确率'],
+      top: 8,
+      textStyle: { color: '#4e5969' }
     },
     tooltip: {
       trigger: 'axis',
       axisPointer: {
-        type: 'line',
-        lineStyle: {
-          color: '#165dff',
-          type: 'dashed'
-        }
+        type: 'cross',
+        crossStyle: { color: '#999' }
       },
       formatter(params) {
-        const point = params[0]
-        const row = point.data.raw
+        const row = params[0].data.raw
         return [
           `<span style="color:#86909c;font-size:12px">${row.date.slice(5)}</span>`,
-          `<span style="color:#165dff;font-weight:600">准确率：${row.accuracy}%</span>`,
           `<span style="color:#1d2129">总量：${row.total}</span>`,
           `<span style="color:#13c7a2">正常：${row.normal}</span>`,
-          `<span style="color:#f56c6c">异常：${row.abnormal}</span>`
+          `<span style="color:#f56c6c">异常：${row.abnormal}</span>`,
+          `<span style="color:#ff7d00;font-weight:600">准确率：${row.accuracy}%</span>`
         ].join('<br/>')
       }
     },
     xAxis: {
       type: 'category',
       name: '入仓时间',
-      boundaryGap: false,
+      boundaryGap: true,
       data: rows.map((item) => item.date.slice(5)),
       axisLine: {
-        lineStyle: {
-          color: '#c9cdd4'
-        }
+        lineStyle: { color: '#c9cdd4' }
       },
       axisLabel: {
         color: '#4e5969'
       }
     },
-    yAxis: {
-      type: 'value',
-      name: '百分比',
-      min: 0,
-      max: 100,
-      axisLabel: {
-        formatter: '{value}%',
-        color: '#4e5969'
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#eef0f4'
+    yAxis: [
+      {
+        type: 'value',
+        name: '数量',
+        axisLabel: {
+          color: '#4e5969'
+        },
+        splitLine: {
+          lineStyle: { color: '#eef0f4' }
         }
+      },
+      {
+        type: 'value',
+        name: '百分比',
+        min: 0,
+        max: 100,
+        axisLabel: {
+          formatter: '{value}%',
+          color: '#4e5969'
+        },
+        splitLine: { show: false }
       }
-    },
+    ],
     series: [
       {
-        name: '快递单号准确率',
+        name: '总量',
+        type: 'bar',
+        barMaxWidth: 32,
+        data: rows.map((item) => ({
+          value: item.total,
+          raw: item
+        }))
+      },
+      {
+        name: '正常',
+        type: 'bar',
+        barMaxWidth: 32,
+        data: rows.map((item) => ({
+          value: item.normal,
+          raw: item
+        }))
+      },
+      {
+        name: '异常',
+        type: 'bar',
+        barMaxWidth: 32,
+        data: rows.map((item) => ({
+          value: item.abnormal,
+          raw: item
+        }))
+      },
+      {
+        name: '准确率',
         type: 'line',
+        yAxisIndex: 1,
         smooth: true,
         symbol: 'circle',
         symbolSize: 7,
-        lineStyle: {
-          width: 3
-        },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(22, 93, 255, 0.22)' },
-            { offset: 1, color: 'rgba(22, 93, 255, 0.02)' }
-          ])
-        },
+        lineStyle: { width: 3 },
         data: rows.map((item) => ({
           value: item.accuracy,
           raw: item

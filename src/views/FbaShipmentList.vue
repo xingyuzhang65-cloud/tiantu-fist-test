@@ -10,6 +10,10 @@
           <el-input v-model="searchForm.fbaNo" placeholder="请输入FBA号" style="width: 180px" />
         </el-form-item>
 
+        <el-form-item label="运单号">
+          <el-input v-model="searchForm.yunDanNo" placeholder="请输入运单号" style="width: 180px" />
+        </el-form-item>
+
         <el-form-item label="系统箱号">
           <el-input v-model="searchForm.boxNo" placeholder="请输入系统箱号" style="width: 180px" />
         </el-form-item>
@@ -43,7 +47,7 @@
           <el-date-picker v-model="searchForm.createTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="width: 240px" />
         </el-form-item>
 
-        <el-form-item label="亚马逊签收时间">
+        <el-form-item label="送仓时间">
           <el-date-picker v-model="searchForm.signTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="width: 240px" />
         </el-form-item>
 
@@ -63,6 +67,7 @@
       <el-table :data="shipmentData" style="width: 100%" border row-key="id">
         <el-table-column prop="waybillNo" label="追踪编码" width="150" fixed="left" />
         <el-table-column prop="fbaNo" label="FBA号" width="180" />
+        <el-table-column prop="yunDanNo" label="运单号" width="180" />
         <el-table-column prop="boxNo" label="系统箱号" width="220" />
         <el-table-column prop="customerShortName" label="客户简称" width="130" />
         <el-table-column prop="recipient" label="收件人" width="130" />
@@ -89,7 +94,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="出仓时间" width="180" />
-        <el-table-column prop="amazonSignTime" label="亚马逊签收时间" width="180" />
+        <el-table-column prop="amazonSignTime" label="送仓时间" width="180" />
       </el-table>
 
       <div class="pagination">
@@ -115,6 +120,7 @@ import * as XLSX from 'xlsx'
 const searchForm = ref({
   waybillNo: '',
   fbaNo: '',
+  yunDanNo: '',
   boxNo: '',
   customerShortName: '',
   destination: '',
@@ -199,10 +205,13 @@ const initMockData = () => {
     const boxCount = (i % 4) + 1
 
     for (let j = 1; j <= boxCount; j++) {
+      const yunDanNo = `YD${2026040000 + i}`
+
       mockData.push({
         id: `SHIP${String(rowIndex).padStart(6, '0')}`,
         waybillNo,
         fbaNo,
+        yunDanNo,
         boxNo: `${waybillNo}U${String(j).padStart(4, '0')}`,
         customerShortName,
         recipient,
@@ -230,6 +239,7 @@ const refreshTable = () => {
 
   if (form.waybillNo) filtered = filtered.filter(item => item.waybillNo.includes(form.waybillNo))
   if (form.fbaNo) filtered = filtered.filter(item => item.fbaNo.includes(form.fbaNo))
+  if (form.yunDanNo) filtered = filtered.filter(item => item.yunDanNo.includes(form.yunDanNo))
   if (form.boxNo) filtered = filtered.filter(item => item.boxNo.includes(form.boxNo))
   if (form.customerShortName) filtered = filtered.filter(item => item.customerShortName === form.customerShortName)
   if (form.destination) filtered = filtered.filter(item => item.destination === form.destination)
@@ -262,6 +272,7 @@ const resetForm = () => {
   searchForm.value = {
     waybillNo: '',
     fbaNo: '',
+    yunDanNo: '',
     boxNo: '',
     customerShortName: '',
     destination: '',
@@ -289,6 +300,7 @@ const exportExcel = () => {
   const exportData = allShipmentData.value.map(item => ({
     追踪编码: item.waybillNo,
     FBA号: item.fbaNo,
+    运单号: item.yunDanNo,
     系统箱号: item.boxNo,
     客户简称: item.customerShortName,
     收件人: item.recipient,
@@ -301,7 +313,7 @@ const exportExcel = () => {
     快递单号: item.trackingNo,
     状态: getStatus(item) === 'normal' ? '正常' : '异常',
     出仓时间: item.createTime,
-    亚马逊签收时间: item.amazonSignTime
+    送仓时间: item.amazonSignTime
   }))
 
   const worksheet = XLSX.utils.json_to_sheet(exportData)
