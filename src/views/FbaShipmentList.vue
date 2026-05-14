@@ -60,30 +60,65 @@
 
     <div class="action-bar">
       <el-button type="primary" @click="exportExcel">导出Excel</el-button>
-      <el-button :loading="syncingDeliveryStatus" @click="updateDeliveryStatus">更新派送状态</el-button>
+      <el-button type="default" circle @click="settingsVisible = true" class="settings-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </el-button>
     </div>
 
-    <el-card class="table-card">
-      <el-table :data="shipmentData" style="width: 100%" border row-key="id">
-        <el-table-column prop="waybillNo" label="追踪编码" width="150" fixed="left" />
-        <el-table-column prop="fbaNo" label="FBA号" width="180" />
-        <el-table-column prop="yunDanNo" label="运单号" width="180" />
-        <el-table-column prop="boxNo" label="系统箱号" width="220" />
-        <el-table-column prop="customerShortName" label="客户简称" width="130" />
-        <el-table-column prop="recipient" label="收件人" width="130" />
-        <el-table-column prop="destination" label="目的地" width="150" />
-        <el-table-column prop="city" label="城市" width="120" />
-        <el-table-column prop="state" label="州" width="100" />
-        <el-table-column prop="zipCode" label="邮编" width="100" />
-        <el-table-column prop="addressLine1" label="地址一" width="220" />
+    <el-dialog v-model="settingsVisible" title="表格设置" width="520px" :close-on-click-modal="false">
+      <div class="settings-section">
+        <h3 class="settings-section-title">列显示</h3>
+        <el-checkbox
+          :model-value="visibleColumns.length === columnOptions.length"
+          :indeterminate="visibleColumns.length > 0 && visibleColumns.length < columnOptions.length"
+          @change="handleCheckAll"
+        >全选</el-checkbox>
+        <el-checkbox-group v-model="visibleColumns" class="column-checkbox-group">
+          <el-checkbox v-for="col in columnOptions" :key="col.prop" :label="col.prop" :disabled="col.fixed">
+            {{ col.label }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div class="settings-section">
+        <h3 class="settings-section-title">排序方式</h3>
+        <div class="sort-row">
+          <el-select v-model="sortColumn" placeholder="选择排序列" clearable style="width: 200px">
+            <el-option v-for="col in sortableColumns" :key="col.prop" :label="col.label" :value="col.prop" />
+          </el-select>
+          <el-radio-group v-model="sortOrder" :disabled="!sortColumn" style="margin-left: 16px">
+            <el-radio value="asc">升序</el-radio>
+            <el-radio value="desc">降序</el-radio>
+          </el-radio-group>
+        </div>
+        <el-button v-if="sortColumn" link type="danger" @click="clearSort" style="margin-top: 8px">清除排序</el-button>
+      </div>
+      <template #footer>
+        <el-button @click="settingsVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveSettings">确定</el-button>
+      </template>
+    </el-dialog>
 
-        <el-table-column label="承运商" width="150">
+    <el-card class="table-card">
+      <el-table :data="shipmentData" style="width: 100%" border row-key="id" @sort-change="handleSortChange">
+        <el-table-column v-if="isColumnVisible('waybillNo')" prop="waybillNo" label="追踪编码" width="150" fixed="left" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('fbaNo')" prop="fbaNo" label="FBA号" width="180" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('yunDanNo')" prop="yunDanNo" label="运单号" width="180" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('boxNo')" prop="boxNo" label="系统箱号" width="220" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('customerShortName')" prop="customerShortName" label="客户简称" width="130" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('recipient')" prop="recipient" label="收件人" width="130" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('destination')" prop="destination" label="目的地" width="150" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('city')" prop="city" label="城市" width="120" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('state')" prop="state" label="州" width="100" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('zipCode')" prop="zipCode" label="邮编" width="100" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('addressLine1')" prop="addressLine1" label="地址一" width="220" sortable="custom" :sort-orders="['ascending', 'descending']" />
+
+        <el-table-column v-if="isColumnVisible('carrier')" label="承运商" width="150" sortable="custom" :sort-orders="['ascending', 'descending']" prop="carrier">
           <template #default="{ row }">
             {{ getCarrierLabel(row.carrier) || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="trackingNo" label="快递单号" width="180" />
-        <el-table-column label="状态" width="100">
+        <el-table-column v-if="isColumnVisible('trackingNo')" prop="trackingNo" label="快递单号" width="180" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('status')" label="状态" width="100" prop="trackingNo">
           <template #default="{ row }">
             <div class="status-cell">
               <span class="status-dot" :class="getStatus(row)" />
@@ -93,8 +128,8 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="出仓时间" width="180" />
-        <el-table-column prop="amazonSignTime" label="送仓时间" width="180" />
+        <el-table-column v-if="isColumnVisible('createTime')" prop="createTime" label="出仓时间" width="180" sortable="custom" :sort-orders="['ascending', 'descending']" />
+        <el-table-column v-if="isColumnVisible('amazonSignTime')" prop="amazonSignTime" label="送仓时间" width="180" sortable="custom" :sort-orders="['ascending', 'descending']" />
       </el-table>
 
       <div class="pagination">
@@ -161,7 +196,48 @@ const shipmentData = ref([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
-const syncingDeliveryStatus = ref(false)
+const settingsVisible = ref(false)
+const columnOptions = ref([
+  { prop: 'waybillNo', label: '追踪编码', fixed: true },
+  { prop: 'fbaNo', label: 'FBA号' },
+  { prop: 'yunDanNo', label: '运单号' },
+  { prop: 'boxNo', label: '系统箱号' },
+  { prop: 'customerShortName', label: '客户简称' },
+  { prop: 'recipient', label: '收件人' },
+  { prop: 'destination', label: '目的地' },
+  { prop: 'city', label: '城市' },
+  { prop: 'state', label: '州' },
+  { prop: 'zipCode', label: '邮编' },
+  { prop: 'addressLine1', label: '地址一' },
+  { prop: 'carrier', label: '承运商' },
+  { prop: 'trackingNo', label: '快递单号' },
+  { prop: 'status', label: '状态' },
+  { prop: 'createTime', label: '出仓时间' },
+  { prop: 'amazonSignTime', label: '送仓时间' }
+])
+const sortableColumns = ref(columnOptions.value.filter(c => !['status', 'carrier'].includes(c.prop)))
+const visibleColumns = ref(columnOptions.value.map(c => c.prop))
+const sortColumn = ref('')
+const sortOrder = ref('asc')
+
+const isColumnVisible = (prop) => visibleColumns.value.includes(prop)
+
+const handleCheckAll = (checked) => {
+  visibleColumns.value = checked
+    ? columnOptions.value.map(c => c.prop)
+    : columnOptions.value.filter(c => c.fixed).map(c => c.prop)
+}
+
+const clearSort = () => {
+  sortColumn.value = ''
+  sortOrder.value = 'asc'
+}
+
+const saveSettings = () => {
+  settingsVisible.value = false
+  currentPage.value = 1
+  refreshTable()
+}
 
 const getCarrierLabel = (carrierValue) => {
   return carrierOptions.value.find(carrier => carrier.value === carrierValue)?.label || carrierValue
@@ -249,6 +325,24 @@ const refreshTable = () => {
   if (form.signTime?.length === 2) filtered = filterByDateRange(filtered, 'amazonSignTime', form.signTime)
 
   total.value = filtered.length
+
+  if (sortColumn.value) {
+    filtered.sort((a, b) => {
+      let valA = a[sortColumn.value]
+      let valB = b[sortColumn.value]
+      if (sortColumn.value === 'carrier') {
+        valA = getCarrierLabel(valA)
+        valB = getCarrierLabel(valB)
+      }
+      if (sortColumn.value === 'status') {
+        valA = getStatus(a) === 'normal' ? '正常' : '异常'
+        valB = getStatus(b) === 'normal' ? '正常' : '异常'
+      }
+      const cmp = valA > valB ? 1 : valA < valB ? -1 : 0
+      return sortOrder.value === 'desc' ? -cmp : cmp
+    })
+  }
+
   const start = (currentPage.value - 1) * pageSize.value
   shipmentData.value = filtered.slice(start, start + pageSize.value)
 }
@@ -323,33 +417,16 @@ const exportExcel = () => {
   ElMessage.success('导出成功')
 }
 
-const updateDeliveryStatus = async () => {
-  if (syncingDeliveryStatus.value) return
-
-  syncingDeliveryStatus.value = true
-  try {
-    await requestDeliveryStatusSync()
-    ElMessage.success('✅ 触发成功，数据正在后台同步')
-  } catch (error) {
-    ElMessage.error(getSyncErrorMessage(error))
-  } finally {
-    syncingDeliveryStatus.value = false
+const handleSortChange = ({ prop, order }) => {
+  if (!prop || !order) {
+    sortColumn.value = ''
+    sortOrder.value = 'asc'
+  } else {
+    sortColumn.value = prop
+    sortOrder.value = order === 'ascending' ? 'asc' : 'desc'
   }
-}
-
-const requestDeliveryStatusSync = async () => {
-  return Promise.resolve()
-}
-
-const getSyncErrorMessage = (error) => {
-  const status = error?.response?.status
-  const code = error?.code
-
-  if (status === 429 || code === 'ECONNABORTED' || code === 'ETIMEDOUT') {
-    return '❌ 同步失败：请求过于频繁，请5分钟后再试'
-  }
-
-  return '❌ 同步失败：请求过于频繁，请5分钟后再试'
+  currentPage.value = 1
+  refreshTable()
 }
 
 onMounted(() => {
@@ -364,7 +441,7 @@ onMounted(() => {
 
 .action-bar {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
@@ -372,6 +449,40 @@ onMounted(() => {
   background-color: #ffffff;
   border: 1px solid #ebeef5;
   border-radius: 8px;
+}
+
+.settings-btn {
+  flex-shrink: 0;
+  color: #606266;
+}
+
+.settings-btn:hover {
+  color: #409eff;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.settings-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.column-checkbox-group {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 4px;
+}
+
+.sort-row {
+  display: flex;
+  align-items: center;
 }
 
 .search-card {
